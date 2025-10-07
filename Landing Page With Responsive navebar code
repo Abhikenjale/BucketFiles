@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avirat Academy Responsive Navbar (HTML/JS)</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV BAR START -->
+    <nav class="bg-indigo-800 shadow-xl w-full sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Brand Logo/Name -->
+                <div class="flex-shrink-0">
+                    <button id="brand-link" data-path="home" class="text-white text-2xl font-extrabold tracking-wider focus:outline-none link-button" aria-label="Avirat Academy Home">
+                        Avirat Academy
+                    </button>
+                </div>
+
+                <!-- Desktop Links (Hidden on mobile) -->
+                <div class="hidden md:block">
+                    <div id="desktop-links" class="ml-10 flex items-baseline space-x-4">
+                        <!-- Links will be generated here by JS -->
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button (Hamburger - Hidden on desktop) -->
+                <div class="-mr-2 flex md:hidden">
+                    <button id="menu-toggle-btn" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-indigo-200 hover:text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-800 focus:ring-white transition duration-150 ease-in-out" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <!-- Hamburger Icon -->
+                        <svg id="hamburger-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <!-- Close Icon -->
+                        <svg id="close-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Panel (Hidden by default, shown via JS toggle) -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div id="mobile-links" class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-indigo-700">
+                <!-- Mobile links will be generated here by JS -->
+            </div>
+        </div>
+    </nav>
+    <!-- NAV BAR END -->
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="py-10">
+        <div id="page-content" class="p-8 max-w-4xl mx-auto">
+            <!-- Content changes here based on navigation -->
+        </div>
+    </main>
+    
+    <!-- Footer / Status Bar -->
+    <footer class="w-full fixed bottom-0 p-3 bg-gray-700 text-center text-white text-sm">
+        <span class="font-semibold">HTML, CSS, and JS implementation.</span> | Current Active Page: <span id="current-page-display" class="font-bold text-indigo-300 capitalize">home</span>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- Navigation Data ---
+        const navLinks = [
+            { name: 'Home', path: 'home', title: 'Welcome to Avirat Academy', content: 'Your journey to knowledge and excellence starts here. Explore our comprehensive range of courses designed for modern education.' },
+            { name: 'Courses', path: 'courses', title: 'Explore Our Courses', content: 'We offer cutting-edge courses in Technology, Humanities, and Arts. Find the perfect path to advance your career and personal growth.' },
+            { name: 'About Us', path: 'about', title: 'About Avirat Academy', content: 'Founded recently, Avirat Academy is committed to providing high-quality, accessible education to students worldwide. Our mission is to empower learners through innovative programs.' },
+            { name: 'Contact', path: 'contact', title: 'Contact Us', content: 'We are always ready to help. Reach out to us via email at info@avirat.edu or call us at (555) 123-4567.' },
+        ];
+
+        let activePage = 'home';
+        const BASE_LINK_CLASSES = "px-4 py-2 rounded-lg transition duration-200 ease-in-out text-base font-medium whitespace-nowrap link-button";
+        const ACTIVE_LINK_CLASSES_DESKTOP = "bg-indigo-600 text-white shadow-md hover:bg-indigo-700";
+        const INACTIVE_LINK_CLASSES_DESKTOP = "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 md:text-white md:hover:text-indigo-200 md:hover:bg-indigo-700";
+        const ACTIVE_LINK_CLASSES_MOBILE = "bg-indigo-900 text-white";
+        const INACTIVE_LINK_CLASSES_MOBILE = "text-indigo-100 hover:bg-indigo-600 hover:text-white";
+
+        // --- DOM Elements ---
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+        const desktopLinksContainer = document.getElementById('desktop-links');
+        const mobileLinksContainer = document.getElementById('mobile-links');
+        const pageContentDiv = document.getElementById('page-content');
+        const currentPageDisplay = document.getElementById('current-page-display');
+
+        // --- Core Functions ---
+
+        // 1. Mobile Menu Toggle Handler
+        function toggleMobileMenu() {
+            const isExpanded = mobileMenu.classList.contains('hidden');
+            
+            // Toggle visibility classes
+            mobileMenu.classList.toggle('hidden', !isExpanded);
+            hamburgerIcon.classList.toggle('hidden', !isExpanded);
+            closeIcon.classList.toggle('hidden', isExpanded);
+            
+            // Update ARIA attribute
+            menuToggleBtn.setAttribute('aria-expanded', isExpanded);
+        }
+
+        // 2. Render Links in both Desktop and Mobile containers
+        function renderLinks() {
+            desktopLinksContainer.innerHTML = '';
+            mobileLinksContainer.innerHTML = '';
+
+            navLinks.forEach(link => {
+                const isCurrent = link.path === activePage;
+
+                // Desktop Link
+                const desktopClass = isCurrent ? ACTIVE_LINK_CLASSES_DESKTOP : INACTIVE_LINK_CLASSES_DESKTOP;
+                const desktopLink = document.createElement('button');
+                desktopLink.textContent = link.name;
+                desktopLink.className = `${BASE_LINK_CLASSES} ${desktopClass}`;
+                desktopLink.setAttribute('data-path', link.path);
+                desktopLinksContainer.appendChild(desktopLink);
+
+                // Mobile Link
+                const mobileClass = isCurrent ? ACTIVE_LINK_CLASSES_MOBILE : INACTIVE_LINK_CLASSES_MOBILE;
+                const mobileLink = document.createElement('button');
+                mobileLink.textContent = link.name;
+                mobileLink.className = `block w-full text-left ${BASE_LINK_CLASSES} ${mobileClass}`;
+                mobileLink.setAttribute('data-path', link.path);
+                mobileLinksContainer.appendChild(mobileLink);
+            });
+        }
+
+        // 3. Render Page Content
+        function renderContent() {
+            const data = navLinks.find(link => link.path === activePage);
+            
+            if (!data) return; // Should not happen
+
+            // HTML content template for the page section
+            pageContentDiv.innerHTML = `
+                <div class="bg-white p-6 md:p-10 rounded-xl shadow-2xl border-t-4 border-indigo-500">
+                    <h2 class="text-4xl font-extrabold text-indigo-800 mb-4">${data.title}</h2>
+                    <p class="text-gray-600 text-lg leading-relaxed">${data.content}</p>
+                    <p class="mt-8 p-3 bg-indigo-50 rounded-lg text-sm text-indigo-700 border border-indigo-200">
+                        This content dynamically changes using vanilla JavaScript, simulating **routing** and **active page** display.
+                    </p>
+                </div>
+            `;
+            // Update footer display
+            currentPageDisplay.textContent = activePage;
+        }
+
+        // 4. Handle Navigation (Simulated Routing)
+        function handleNavigation(event) {
+            const target = event.target.closest('.link-button');
+            if (target) {
+                const newPath = target.getAttribute('data-path');
+                if (newPath) {
+                    activePage = newPath;
+                    renderLinks();
+                    renderContent();
+                    
+                    // Close mobile menu if open
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        toggleMobileMenu();
+                    }
+                }
+            }
+        }
+        
+        // --- Initialization and Event Listeners ---
+        
+        // 1. Attach listener to the menu toggle button
+        menuToggleBtn.addEventListener('click', toggleMobileMenu);
+
+        // 2. Attach a single listener to the nav for click delegation (links)
+        document.querySelector('nav').addEventListener('click', handleNavigation);
+        
+        // 3. Attach a single listener to the brand button
+        document.getElementById('brand-link').addEventListener('click', handleNavigation);
+
+
+        // 4. Initial load
+        window.onload = () => {
+            renderLinks();
+            renderContent();
+        };
+
+    </script>
+</body>
+</html>
